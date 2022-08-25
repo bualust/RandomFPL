@@ -60,7 +60,7 @@ def get_random_team(df, isFirstAttempt, random_team):
         random_FWD  = forwards.sample(3)
         random_team = pd.concat([random_GKPs, random_DEF, random_MID, random_FWD])
     else:
-        removed_player, new_member = get_new_player(random_team, df)
+        removed_player, new_member = substituion(random_team, df)
         print('Please say goodbye to --- ')
         print(removed_player)
         player_loc  = removed_player.head().index.values
@@ -71,27 +71,26 @@ def get_random_team(df, isFirstAttempt, random_team):
 
     return random_team
 
-def get_new_player(random_team, df):
+def select_new_candidates(random_team, df):
 
-    pick_one_player  = random_team.sample(1)
-    removed_position = int(pick_one_player.iloc[0]['Position'])
-    removed_price    = float(pick_one_player.iloc[0]['Price'])
+    extracted_player  = random_team.sample(1)
+    removed_position = int(extracted_player.iloc[0]['Position'])
+    removed_price    = float(extracted_player.iloc[0]['Price'])
     new_candidates   = df[df["Position"]==removed_position]
     new_candidates   = new_candidates[new_candidates['Price']!=removed_price]
     new_candidates   = new_candidates[new_candidates['Price']>removed_price]
 
+    return extracted_player, new_candidates
+
+def substituion(random_team, df):
+
+    extracted_player, new_candidates = select_new_candidates(random_team, df)
     while new_candidates.empty:
-        pick_one_player  = random_team.sample(1)
-        removed_position = int(pick_one_player.iloc[0]['Position'])
-        removed_price    = float(pick_one_player.iloc[0]['Price'])
-        new_candidates   = df[df["Position"]==removed_position]
-        new_candidates   = new_candidates[new_candidates['Price']!=removed_price]
-        new_candidates   = new_candidates[new_candidates['Price']>removed_price]
+        extracted_player, new_candidates = select_new_candidates(random_team, df)
 
     new_member       = new_candidates.sample(1)
 
-
-    return pick_one_player, new_member
+    return extracted_player, new_member
 
 def maximise_expense(random_team, df):
 
