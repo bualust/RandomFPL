@@ -4,7 +4,9 @@ from prettytable import PrettyTable
 from fpl import FPL
 import pandas as pd
 
+#Read PL players from website and gives you a random team
 async def main():
+
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
         players = await fpl.get_players()
@@ -16,10 +18,12 @@ async def main():
     print_pretty_table(random_team)
     print('Congratulations! You spent ', sum(random_team['Price']))
 
+#removes injured and suspended players
 def select_only_active(df):
     df = df[df['Status']=='a']
     return df
 
+#creates pandas dataframe of players
 def pandas_df_players(players):
 
     names = []
@@ -45,6 +49,7 @@ def pandas_df_players(players):
     )
     return df
 
+#generates a random team from pandasDF
 def get_random_team(df, isFirstAttempt, random_team):
 
     goal_keepers = df[df["Position"]==1]
@@ -71,6 +76,8 @@ def get_random_team(df, isFirstAttempt, random_team):
 
     return random_team
 
+#removes one player randomly from team and substitues
+#with a player of same position but more expensive
 def select_new_candidates(random_team, df):
 
     extracted_player  = random_team.sample(1)
@@ -82,6 +89,8 @@ def select_new_candidates(random_team, df):
 
     return extracted_player, new_candidates
 
+#there might be sometimes no candidate to make substitution
+#select a new player to remove
 def substituion(random_team, df):
 
     extracted_player, new_candidates = select_new_candidates(random_team, df)
@@ -92,6 +101,8 @@ def substituion(random_team, df):
 
     return extracted_player, new_member
 
+#keeps removing one player and replacing it until
+#all money are spent (cap up to 50 iterations)
 def maximise_expense(random_team, df):
 
     expense = sum(random_team['Price'])
@@ -111,6 +122,7 @@ def maximise_expense(random_team, df):
     return random_team
 
 
+#makes a pretty table of your random team
 def print_pretty_table(random_team):
     player_table = PrettyTable()
     player_table.field_names = ["Player", "Price", "Element Type",
