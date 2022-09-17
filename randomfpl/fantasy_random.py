@@ -4,8 +4,12 @@ from prettytable import PrettyTable
 from fpl import FPL
 import pandas as pd
 
+def main():
+    """`main` function for RandomFPL module"""
+    asyncio.run(generate_team())
+
 #Read PL players from website and gives you a random team
-async def main():
+async def generate_team():
 
     async with aiohttp.ClientSession() as session:
         fpl = FPL(session)
@@ -135,4 +139,4 @@ def print_pretty_table(random_team):
     print(player_table)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
