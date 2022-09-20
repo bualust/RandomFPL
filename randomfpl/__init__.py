@@ -1,0 +1,1 @@
+from .fantasy_random import main

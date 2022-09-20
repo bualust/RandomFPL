@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "randomfpl"
+version = "0.0.1"
+dependencies = [
+    "pandas",
+    "fpl",
+    "prettytable",
+]
+
+[project.optional-dependencies]
+dev = ["pylint", "black"]
+
+[project.scripts]
+randomfpl = "randomfpl:main"
