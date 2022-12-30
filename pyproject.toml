@@ -9,6 +9,7 @@ dependencies = [
     "pandas",
     "fpl",
     "prettytable",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
