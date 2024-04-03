@@ -283,7 +283,6 @@ def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
     iterations = 0
     duplicate = random_team[random_team.duplicated()]
     while expense < EXPENSE:
-        print("Iteration number ", iterations)
         if iterations > 100:
             break
         iterations += 1
