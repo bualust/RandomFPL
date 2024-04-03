@@ -5,6 +5,9 @@ from prettytable import PrettyTable
 from fpl import FPL
 import pandas as pd
 
+
+EXPENSE = 102.7
+
 def main():
     """`main` function for RandomFPL module"""
     asyncio.run(generate_team())
@@ -223,8 +226,9 @@ def maximise_expense(random_team, df, av_g_f,av_a_m,av_g_c):
     expense = sum(random_team['Price'])
     iterations = 0
     duplicate = random_team[random_team.duplicated()]
-    while expense < 102.1:
-        if iterations > 50: break
+    while expense < EXPENSE:
+        print("Iteration number ",iterations)
+        if iterations > 100: break
         iterations += 1
         new_random_team = get_random_team(df, False, random_team, av_g_f,av_a_m,av_g_c)
         new_expense = sum(new_random_team['Price'])
@@ -233,7 +237,7 @@ def maximise_expense(random_team, df, av_g_f,av_a_m,av_g_c):
             new_random_team = get_random_team(df, False, random_team, av_g_f,av_a_m,av_g_c)
             new_expense = sum(new_random_team['Price'])
             duplicate, same_team_players, i = find_duplicates(new_random_team)
-        if new_expense > expense and new_expense < 102.1:
+        if new_expense > expense and new_expense < EXPENSE:
             random_team = new_random_team
             expense = new_expense
 
