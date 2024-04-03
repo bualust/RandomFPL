@@ -193,6 +193,8 @@ def select_new_candidates(random_team, df, av_g_f,av_a_m,av_g_c):
     new_candidates   = df[df["Position"]==removed_position]
     new_candidates   = new_candidates[new_candidates['Price']!=removed_price]
     new_candidates   = new_candidates[new_candidates['Price']>removed_price]
+    if new_candidates.empty:
+        return extracted_player,extracted_player
     if removed_position==4:
         new_candidates   = new_candidates[new_candidates['GP90']>removed_gp90]
         new_candidates   = new_candidates[new_candidates['GP90']>av_g_f]
