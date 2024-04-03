@@ -175,8 +175,8 @@ def get_random_team(df, isFirstAttempt, random_team, av_g_f, av_a_m, av_g_c):
     return random_team
 
 def select_new_candidates(random_team, df, av_g_f,av_a_m,av_g_c):
-    """`select_new_candidates`removes one player randomly from team and substitues"""
-    """with a player of same position but more expensive"""
+    """`select_new_candidates`removes one player randomly from team and substitues
+    with a player of same position but more expensive"""
 
     extracted_player  = random_team.sample(1)
     removed_position = int(extracted_player.iloc[0]['Position'])
@@ -206,8 +206,8 @@ def select_new_candidates(random_team, df, av_g_f,av_a_m,av_g_c):
     return extracted_player, new_candidates
 
 def substituion(random_team, df, av_g_f,av_a_m,av_g_c):
-    """`substituion` there might be sometimes no candidate to make substitution"""
-    """select a new player to remove"""
+    """`substituion` there might be sometimes no candidate to make substitution
+    select a new player to remove"""
 
     extracted_player, new_candidates = select_new_candidates(random_team, df,
                                                              av_g_f,av_a_m,av_g_c)
@@ -220,8 +220,8 @@ def substituion(random_team, df, av_g_f,av_a_m,av_g_c):
     return extracted_player, new_member
 
 def maximise_expense(random_team, df, av_g_f,av_a_m,av_g_c):
-    """`maximise_expense` keeps removing one player and replacing it until"""
-    """all money are spent (cap up to 50 iterations)"""
+    """`maximise_expense` keeps removing one player and replacing it until
+    all money are spent (cap up to 50 iterations)"""
 
     expense = sum(random_team['Price'])
     iterations = 0
@@ -246,9 +246,9 @@ def maximise_expense(random_team, df, av_g_f,av_a_m,av_g_c):
     return random_team
 
 def find_duplicates(team_DF):
-    """`find_duplicates` finds player if added twice to the team"""
-    """finds players and same team and number of"""
-    """players in the same team-1"""
+    """`find_duplicates` finds player if added twice to the team
+    finds players and same team and number of
+    players in the same team-1"""
 
     duplicate = team_DF[team_DF.duplicated()]
     same_team_players = team_DF[team_DF.duplicated(subset='Team')]
