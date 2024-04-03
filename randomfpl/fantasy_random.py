@@ -7,6 +7,7 @@ import pandas as pd
 
 
 EXPENSE = 102.7
+#ALLOWED_TEAMS = [6, 4, 12, 16, 10, 18, 19, 2]
 
 def main():
     """`main` function for RandomFPL module"""
@@ -96,6 +97,8 @@ def select_only_active(df):
     """`select_only_active` removes injured and suspended players"""
     df = df[df['Status']=='a']
     df = df[df['Minutes']!=0]
+    #df = df[df['Name']!="Haaland"]
+    #df = df[df['Team'].isin(ALLOWED_TEAMS)]
     return df
 
 def pandas_df_players(players):
