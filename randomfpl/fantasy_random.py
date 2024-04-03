@@ -27,13 +27,16 @@ async def generate_team():
     #df = pd.read_csv('Output.csv')
     df = select_only_active(df)
     max_minutes = max(df["Minutes"])
+    print("Total minutes    ",max_minutes)
     print("All active players", len(df))
     df = df[df["Minutes"]>max_minutes*0.5]
     print("All active players that played more than max/2", len(df))
-    #df.to_csv('Output.csv',index=False)
+    df.to_csv('Output.csv',index=False)
 
     av_g_f,av_a_m,av_g_c = print_average_quantities(df)
+    print("Get random team")
     random_team = get_random_team(df, True, df, av_g_f, av_a_m, av_g_c)
+    print("Get random team maximising expense")
     random_team = maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c)
     print_pretty_table(random_team)
 
@@ -181,12 +184,12 @@ def select_new_candidates(random_team, df, av_g_f,av_a_m,av_g_c):
     """`select_new_candidates`removes one player randomly from team and substitues
     with a player of same position but more expensive"""
 
-    extracted_player  = random_team.sample(1)
+    extracted_player = random_team.sample(1)
     removed_position = int(extracted_player.iloc[0]['Position'])
     removed_price    = float(extracted_player.iloc[0]['Price'])
     removed_gp90     = float(extracted_player.iloc[0]['GP90'])
     removed_ap90     = float(extracted_player.iloc[0]['AP90'])
-    removed_gcp90     = float(extracted_player.iloc[0]['GCP90'])
+    removed_gcp90    = float(extracted_player.iloc[0]['GCP90'])
     new_candidates   = df[df["Position"]==removed_position]
     new_candidates   = new_candidates[new_candidates['Price']!=removed_price]
     new_candidates   = new_candidates[new_candidates['Price']>removed_price]
