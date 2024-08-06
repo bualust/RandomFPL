@@ -212,16 +212,17 @@ def get_random_team(df, isFirstAttempt, random_team, av_g_f, av_a_m, av_g_c):
         random_DEF = defenders.sample(5)
         random_MID = midfielders.sample(5)
         random_FWD = forwards.sample(3)
-        random_team = pd.concat([random_GKPs, random_DEF, random_MID, random_FWD])
+        team = pd.concat([random_GKPs, random_DEF, random_MID, random_FWD])
+        return team
     else:
+        random_team_copy = random_team.copy()
         removed_player, new_member = substituion(
-            random_team, df, av_g_f, av_a_m, av_g_c
+            random_team_copy, df, av_g_f, av_a_m, av_g_c
         )
         player_loc = removed_player.head().index.values
-        random_team = random_team.drop(index=player_loc, axis=1)
-        random_team = pd.concat([random_team, new_member])
-
-    return random_team
+        random_team_copy = random_team_copy.drop(index=player_loc, axis=1)
+        random_team_copy = pd.concat([random_team_copy, new_member])
+        return random_team_copy
 
 
 def select_new_candidates(random_team, df, av_g_f, av_a_m, av_g_c):
@@ -282,6 +283,7 @@ def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
     expense = sum(random_team["Price"])
     iterations = 0
     duplicate = random_team[random_team.duplicated()]
+    #bench_worth_count = random_team[random_team["Price"] == 4.5].shape[0]
     while expense < EXPENSE:
         if iterations > 100:
             break
@@ -290,13 +292,20 @@ def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
             df, False, random_team, av_g_f, av_a_m, av_g_c
         )
         new_expense = sum(new_random_team["Price"])
-        duplicate, same_team_players, i = find_duplicates(new_random_team)
-        while duplicate.empty is False or i >= 3:
+        good_bench = analyse_bench(new_random_team)
+        while good_bench is False:
             new_random_team = get_random_team(
-                df, False, random_team, av_g_f, av_a_m, av_g_c
+                df, False, new_random_team, av_g_f, av_a_m, av_g_c
             )
             new_expense = sum(new_random_team["Price"])
             duplicate, same_team_players, i = find_duplicates(new_random_team)
+            while duplicate.empty is False or i >= 3:
+                new_random_team = get_random_team(
+                    df, False, new_random_team, av_g_f, av_a_m, av_g_c
+                )
+                new_expense = sum(new_random_team["Price"])
+                duplicate, same_team_players, i = find_duplicates(new_random_team)
+            good_bench = analyse_bench(new_random_team)
         if new_expense > expense and new_expense < EXPENSE:
             random_team = new_random_team
             expense = new_expense
@@ -305,6 +314,21 @@ def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
 
     return random_team
 
+def analyse_bench(team):
+    """ check players with low price and make sure
+    there is at least one goalie among them"""
+    bench = team[team["Price"] <=4.5]
+    bench_count = bench.shape[0]
+    bench_worth = sum(bench.Price)
+    bench_worth_aim = 20
+    bench_goalie_count = bench[bench.Position==1].shape[0]
+    print(bench_worth, bench_goalie_count)
+    #if bench_worth<=bench_worth_aim and bench_goalie_count>=1:
+    if bench_worth<=bench_worth_aim and bench_count>=3:
+        return True
+    else:
+        return False
+    #return bench_worth, bench_goalie_count
 
 def find_duplicates(team_DF):
     """`find_duplicates` finds player if added twice to the team
