@@ -3,21 +3,58 @@ import aiohttp
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
 from fpl import FPL
+from datetime import date
+import argparse
 import pandas as pd
-
-
-EXPENSE = 102.7
-# ALLOWED_TEAMS = [6, 4, 12, 16, 10, 18, 19, 2]
 
 
 def main():
     """`main` function for RandomFPL module"""
-    asyncio.run(generate_team())
-    # generate_team()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--show_average",
+        required=False,
+        action="store_true",
+        help="Show average stats of PL players",
+    )
+    parser.add_argument(
+        "--show_toprank",
+        required=False,
+        action="store_true",
+        help="Show top rank PL players",
+    )
+    parser.add_argument(
+        "--show_ext_info",
+        required=False,
+        action="store_true",
+        help="Show more player info in table",
+    )
+    parser.add_argument(
+        "--max_expense",
+        required=False,
+        default=100,
+        type=float,
+        help="Available budget",
+    )
+    parser.add_argument(
+        "--veto_player",
+        required=False,
+        type=str,
+        help="Specify SURNAME of one player vetoed from entering the team",
+    )
+    parser.add_argument(
+        "--veto_teams",
+        required=False,
+        nargs="+",
+        type=int,
+        help="List of teams you want to veto (for blank GWs)",
+    )
+
+    args = parser.parse_args()
+    asyncio.run(generate_team(args))
 
 
-async def generate_team():
-    # def generate_team():
+async def generate_team(args):
     """`generate_team` Read PL players from website and gives you a random team"""
 
     async with aiohttp.ClientSession() as session:
@@ -25,23 +62,25 @@ async def generate_team():
         players = await fpl.get_players()
 
     df = pandas_df_players(players)
-    # df = pd.read_csv('Output.csv')
-    df = select_only_active(df)
+    df = select_only_active(args, df)
     max_minutes = max(df["Minutes"])
-    print("Total minutes    ", max_minutes)
-    print("All active players", len(df))
     df = df[df["Minutes"] > max_minutes * 0.5]
-    print("All active players that played more than max/2", len(df))
     df.to_csv("Output.csv", index=False)
 
-    av_g_f, av_a_m, av_g_c = print_average_quantities(df)
-    print("Get random team")
+    av_g_f, av_a_m, av_g_c = print_average_quantities(df, args.show_average)
     random_team = get_random_team(df, True, df, av_g_f, av_a_m, av_g_c)
-    print("Get random team maximising expense")
-    random_team = maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c)
-    print_pretty_table(random_team)
+    random_team = maximise_expense(args, random_team, df, av_g_f, av_a_m, av_g_c)
 
-    print("Congratulations! You spent ", sum(random_team["Price"]))
+    print(f"Team generated on {date.today()}\n")
+    print(
+        f"Total expense is {sum(random_team['Price'])} out of a total budget of {args.max_expense}\n"
+    )
+    if args.veto_player:
+        print(f"Vetoed player is: {args.veto_player}\n")
+    if args.veto_teams:
+        print(f"Vetoed teams are: {args.veto_teams}\n")
+
+    print_pretty_table(args, random_team)
 
     to_plot = {
         "GP90": "Number of goals scored per 90mins played",
@@ -102,17 +141,18 @@ async def generate_team():
     df_maxgoals = df.loc[df["GP90"].idxmax()]
     df_maxassists = df.loc[df["AP90"].idxmax()]
     df_mingoalscon = df.loc[df["GCP90"].idxmin()]
-    print(
-        "Max number of goals\n",
-        df_maxgoals,
-        "\nMax number of assists\n",
-        df_maxassists,
-        "\nMin number of goals conceded\n",
-        df_mingoalscon,
-    )
+    if args.show_toprank:
+        print(
+            "\n Max number of goals\n",
+            df_maxgoals,
+            "\nMax number of assists\n",
+            df_maxassists,
+            "\nMin number of goals conceded\n",
+            df_mingoalscon,
+        )
 
 
-def print_average_quantities(df):
+def print_average_quantities(df, show):
     """`print_average_quantities` prints average goals and assists"""
     forwards = df[df["Position"] == 4]
     midfielders = df[df["Position"] == 3]
@@ -122,24 +162,27 @@ def print_average_quantities(df):
     av_a_f = sum(forwards["AP90"]) / len(forwards)
     av_a_m = sum(midfielders["AP90"]) / len(midfielders)
     av_g_c = sum(defender["GCP90"]) / len(defender)
-    print("==========================")
-    print("90/mins rescaled")
-    print("Average Goals Forwards", av_g_f)
-    print("Average Goals Midfielders", av_g_m)
-    print("Average Assists Forwards", av_a_f)
-    print("Average Assists Midfielders", av_a_m)
-    print("Average Goals conceded defenders", av_g_c)
-    print("==========================")
+    if show is True:
+        print("==========================")
+        print("90/mins rescaled")
+        print("Average Goals Forwards", av_g_f)
+        print("Average Goals Midfielders", av_g_m)
+        print("Average Assists Forwards", av_a_f)
+        print("Average Assists Midfielders", av_a_m)
+        print("Average Goals conceded defenders", av_g_c)
+        print("==========================\n")
 
     return av_g_f, av_a_m, av_g_c
 
 
-def select_only_active(df):
+def select_only_active(args, df):
     """`select_only_active` removes injured and suspended players"""
     df = df[df["Status"] == "a"]
     df = df[df["Minutes"] != 0]
-    # df = df[df['Name']!="Haaland"]
-    # df = df[df['Team'].isin(ALLOWED_TEAMS)]
+    if args.veto_player:
+        df = df[df["Name"] != args.veto_player]
+    if args.veto_teams:
+        df = df[~df["Team"].isin(args.veto_teams)]
     return df
 
 
@@ -275,14 +318,14 @@ def substituion(random_team, df, av_g_f, av_a_m, av_g_c):
     return extracted_player, new_member
 
 
-def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
+def maximise_expense(args, random_team, df, av_g_f, av_a_m, av_g_c):
     """`maximise_expense` keeps removing one player and replacing it until
     all money are spent (cap up to 50 iterations)"""
 
     expense = sum(random_team["Price"])
     iterations = 0
     duplicate = random_team[random_team.duplicated()]
-    while expense < EXPENSE:
+    while expense < args.max_expense:
         if iterations > 100:
             break
         iterations += 1
@@ -297,11 +340,9 @@ def maximise_expense(random_team, df, av_g_f, av_a_m, av_g_c):
             )
             new_expense = sum(new_random_team["Price"])
             duplicate, same_team_players, i = find_duplicates(new_random_team)
-        if new_expense > expense and new_expense < EXPENSE:
+        if new_expense > expense and new_expense < args.max_expense:
             random_team = new_random_team
             expense = new_expense
-
-    print("Confirming team for total expense of == ", expense)
 
     return random_team
 
@@ -322,16 +363,13 @@ def find_duplicates(team_DF):
     return duplicate, same_team_players, i
 
 
-def print_pretty_table(random_team):
+def print_pretty_table(args, random_team):
     """`print_pretty_table` makes a pretty table of your random team"""
-    player_table = PrettyTable()
-    player_table.field_names = [
+    player_table = PrettyTable(junction_char="|")
+
+    field_names = [
         "Player",
         "Price",
-        "Element Type",
-        "Team",
-        "Status",
-        "Minutes",
         "Goals",
         "Goals/90mins",
         "Assists",
@@ -339,27 +377,39 @@ def print_pretty_table(random_team):
         "Goals Conceded",
         "Goals Conc/90mins",
     ]
-    player_table.align["Player"] = "l"
+
+    if args.show_ext_info:
+        field_names.append("Element Type")
+        field_names.append("Team")
+        field_names.append("Status")
+        field_names.append("Minutes")
+
+    player_table.field_names = field_names
+
     for index, player in random_team.iterrows():
-        player_table.add_row(
-            [
-                player["Name"],
-                player["Price"],
-                player["Position"],
-                player["Team"],
-                player["Status"],
-                player["Minutes"],
-                player["Goals"],
-                player["GP90"],
-                player["Assists"],
-                player["AP90"],
-                player["Goals Conceded"],
-                player["GCP90"],
-            ]
-        )
+        row = [
+            player["Name"],
+            player["Price"],
+            player["Goals"],
+            player["GP90"],
+            player["Assists"],
+            player["AP90"],
+            player["Goals Conceded"],
+            player["GCP90"],
+        ]
+
+        if args.show_ext_info:
+            row.append(player["Position"])
+            row.append(player["Team"])
+            row.append(player["Status"])
+            row.append(player["Minutes"])
+        player_table.add_row(row)
+
+    player_table.align["Player"] = "l"
 
     print(player_table)
 
 
 if __name__ == "__main__":
+    """`main`"""
     main()
