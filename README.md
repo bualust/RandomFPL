@@ -13,3 +13,18 @@ pip install .
 ```bash
 randomfpl
 ```
+
+## Test website locally
+
+Create a dummy team-of-day.md
+
+```bash
+mkdir _includes
+echo "#This is where the team of the day will be!" > _includes/team-of-the-day.md
+```
+
+build website with bundle
+
+```bash
+bundle exec jekyll serve --port 4001
+```
