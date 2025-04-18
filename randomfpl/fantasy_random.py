@@ -157,6 +157,8 @@ async def generate_team(args):
             df_mingoalscon,
         )
 
+    return random_team
+
 
 def print_average_quantities(df, show):
     """`print_average_quantities` prints average goals and assists"""
