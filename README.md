@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/bualust/RandomFPL/branch/main/graph/badge.svg)](https://codecov.io/gh/bualust/RandomFPL)
+
 # RandomFPL
 
 A quick script to generate a pseudo-random Fantasy Premier League team.
