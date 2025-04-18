@@ -20,4 +20,4 @@ asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest","pytest-cov"]
