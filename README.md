@@ -28,3 +28,16 @@ build website with bundle
 ```bash
 bundle exec jekyll serve --port 4001
 ```
+
+## Test actions locally
+
+Using [act](https://nektosact.com/introduction.html)
+
+Make sure Docker is running then simply
+```bash
+act
+```
+If you want to run it on one of the actions simply
+```bash
+act -W .github/workflows/action.yml
+```
