@@ -10,6 +10,12 @@ import pandas as pd
 
 def main():
     """`main` function for RandomFPL module"""
+    args = parse_args()
+    asyncio.run(generate_team(args))
+
+
+def parse_args():
+    """'parse_args' returns parser.parse_args()"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--show_average",
@@ -51,7 +57,7 @@ def main():
     )
 
     args = parser.parse_args()
-    asyncio.run(generate_team(args))
+    return args
 
 
 async def generate_team(args):
