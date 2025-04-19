@@ -2,7 +2,7 @@
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/bualust/RandomFPL/branch/main/graph/badge.svg)](https://codecov.io/gh/bualust/RandomFPL)
-![PageDeployment](https://github.com/bualust/RandomFPL/actions/workflows/jekyll-gh-pages.yml/badge.svg)
+[![PageDeployment](https://github.com/bualust/RandomFPL/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://bualust.github.io/RandomFPL/)
 
 # RandomFPL
 
