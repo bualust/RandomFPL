@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "randomfpl"
 version = "0.0.1"
 dependencies = [
-    "pandas",
+    "pandas<=2.3.3",
     "fpl",
     "prettytable",
     "matplotlib",
