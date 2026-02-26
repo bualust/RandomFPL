@@ -269,7 +269,7 @@ def get_random_team(df, isFirstAttempt, random_team, av_g_f, av_a_m, av_g_c):
             random_team, df, av_g_f, av_a_m, av_g_c
         )
         player_loc = removed_player.head().index.values
-        random_team = random_team.drop(index=player_loc, axis=1)
+        random_team = random_team.drop(index=player_loc)
         random_team = pd.concat([random_team, new_member])
 
     return random_team
